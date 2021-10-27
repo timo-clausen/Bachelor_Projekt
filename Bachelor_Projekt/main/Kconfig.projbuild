@@ -1,0 +1,43 @@
+# put here your custom config value
+menu "Wifi Configuration"
+	config ESP_WIFI_SSID
+	    string "WiFi SSID"
+	    default "myssid"
+	    help
+		SSID (network name) for the example to connect to.
+	
+	config ESP_WIFI_PASSWORD
+	    string "WiFi Password"
+	    default "mypassword"
+	    help
+		WiFi password (WPA or WPA2) for the example to use.
+endmenu
+
+
+
+menu "MQTT Configuration"
+
+    config BROKER_URI
+        string "Broker URL"
+        default "mqtts://mqtt.eclipse.org:8883"
+        help
+            URL of an mqtt broker which this example connects to.
+
+    config BROKER_CERTIFICATE_OVERRIDE
+        string "Broker certificate override"
+        default ""
+        help
+            Please leave empty if broker certificate included from a textfile; otherwise fill in a base64 part of PEM
+            format certificate
+
+    config BROKER_CERTIFICATE_OVERRIDDEN
+        bool
+        default y if BROKER_CERTIFICATE_OVERRIDE != ""
+
+    config BROKER_BIN_SIZE_TO_SEND
+        # This option is not visible and is used only to set parameters for example tests
+        # Here we configure the data size to send and to be expected in the python script
+        int
+        default 20000
+
+endmenu
