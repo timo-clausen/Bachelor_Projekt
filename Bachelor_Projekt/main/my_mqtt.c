@@ -39,10 +39,10 @@ static const uint8_t mqtt_eclipseprojects_io_pem_start[]  = "-----BEGIN CERTIFIC
 #else
 extern const uint8_t hivemq_server_cert_pem_start[]   asm("_binary_hivemq_server_cert_pem_start");  // Links nur ein Variablen Name Rechts muss zur Datei passen, komischerweise nur in Text. ob Minus oder Unterstrich ist egal. im Asembler jedoch kein Minus erlaubt
 #endif
-extern const uint8_t mqtt_eclipseprojects_io_pem_end[]   asm("_binary_mqtt_eclipseprojects_io_pem_end");
+//extern const uint8_t mqtt_eclipseprojects_io_pem_end[]   asm("_binary_mqtt_eclipseprojects_io_pem_end");
 
-extern const uint8_t hivemq_mqtt_client_cert_2_pem[]   asm("_binary_mqtt_client_cert_2_pem_start");
-extern const uint8_t hivemq_mqtt_client_key_2_pem[]   asm("_binary_mqtt_client_key_2_pem_start");
+//extern const uint8_t hivemq_mqtt_client_cert_2_pem[]   asm("_binary_mqtt_client_cert_2_pem_start");
+//extern const uint8_t hivemq_mqtt_client_key_2_pem[]   asm("_binary_mqtt_client_key_2_pem_start");
 
 // Note: this function is for testing purposes only publishing part of the active partition
 //       (to be checked against the original binary)
