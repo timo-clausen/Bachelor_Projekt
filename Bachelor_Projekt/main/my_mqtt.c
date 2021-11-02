@@ -18,13 +18,16 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
-//#include "protocol_examples_common.h"
+//#include "protocol_examples_common.h "
 
 #include "esp_log.h"
 #include "mqtt_client.h"
 #include "esp_tls.h"
 #include "esp_ota_ops.h"
 #include <sys/param.h>
+
+#include "json_parser.h"
+
 
 static const char *TAG = "my_mqtt";
 
@@ -38,10 +41,15 @@ extern const uint8_t hivemq_server_cert_pem_start[]   asm("_binary_hivemq_server
 #endif
 extern const uint8_t mqtt_eclipseprojects_io_pem_end[]   asm("_binary_mqtt_eclipseprojects_io_pem_end");
 
-//
+extern const uint8_t hivemq_mqtt_client_cert_2_pem[]   asm("_binary_mqtt_client_cert_2_pem_start");
+extern const uint8_t hivemq_mqtt_client_key_2_pem[]   asm("_binary_mqtt_client_key_2_pem_start");
+
 // Note: this function is for testing purposes only publishing part of the active partition
 //       (to be checked against the original binary)
 //
+
+
+
 static void send_binary(esp_mqtt_client_handle_t client)
 {
     spi_flash_mmap_handle_t out_handle;
@@ -66,7 +74,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
             msg_id = esp_mqtt_client_subscribe(client, "test/topic", 0);
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 
-            msg_id = esp_mqtt_client_publish(client, "test/topic", "data_3", 0, 1, 0);
+            //msg_id = esp_mqtt_client_publish(client, "test/topic", "data_3", 0, 1, 0);
 
             break;
         case MQTT_EVENT_DISCONNECTED:
@@ -91,6 +99,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
                 ESP_LOGI(TAG, "Sending the binary");
                 send_binary(client);
             }
+            parse_json(event->data, event->data_len);
             break;
         case MQTT_EVENT_ERROR:
             ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -122,11 +131,17 @@ void mqtt_app_start(void)
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = CONFIG_BROKER_URI,
         .cert_pem = (const char *)hivemq_server_cert_pem_start,
+		//.client_cert_pem = (const char *)hivemq_mqtt_client_cert_2_pem,
+		//.client_key_pem = (const char *)hivemq_mqtt_client_key_2_pem,
+		//.clientkey_password = "testPass",
+		//.clientkey_password_len = 8,
 		.username = "esp32",
 		.password = "esp32pw",
+
     };
-    printf((const char *)hivemq_server_cert_pem_start);
-    printf(" das sind die daten\n");
+    //printf((const char *)hivemq_server_cert_pem_start);
+    //printf(" das sind die daten\n");
+
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);

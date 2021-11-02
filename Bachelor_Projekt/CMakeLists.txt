@@ -10,3 +10,5 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(app-template)
 
 target_add_binary_data(app-template.elf "main/hivemq-server-cert.pem" TEXT)
+target_add_binary_data(app-template.elf "main/mqtt-client-cert-2.pem" TEXT)
+target_add_binary_data(app-template.elf "main/mqtt-client-key-2.pem" TEXT)

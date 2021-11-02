@@ -4,6 +4,9 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 
+#include "esp_wifi.h"
+#include <esp_wifi_types.h>
+
 #include "my_wifi.h"
 #include "my_mqtt.h"
 
@@ -31,7 +34,7 @@ void set_log_levels(){
 void app_main(void)
 {
 	set_log_levels();
-	//Initialize NVS aus wifi_connect
+	//Initialize NVS aus wifi_connect netconn
 	esp_err_t ret = nvs_flash_init();
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_LOGE(TAG, "irgendwas mit NVS");
@@ -56,11 +59,13 @@ void app_main(void)
 
     gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
     int level = 0;
+    //wifi_country_t power_type;
     while (true) {
         gpio_set_level(GPIO_NUM_4, level);
         level = !level;
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
+        //esp_wifi_get_country(&power_type);
+        //ESP_LOGI(TAG, "power type: %d", power_type.max_tx_power);
     }
 }
 
