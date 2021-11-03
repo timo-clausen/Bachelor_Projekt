@@ -5,4 +5,7 @@
  *      Author: TiC
  */
 
+
 void parse_json(char *json_string_t, int string_length);
+void create_json_task();
+void set_send_status_flag();

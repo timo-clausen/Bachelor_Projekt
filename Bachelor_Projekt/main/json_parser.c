@@ -12,9 +12,17 @@
 #include "cJSON.h"
 #include "device_control.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "my_mqtt.h"
 
 
 static const char *TAG = "json_parser";
+static bool send_uplink_message_flag = false;
+
+void set_send_uplink_message_flag(){
+	send_uplink_message_flag = true;
+}
 
 void parse_status_command(cJSON *sub_json_object) {
 	device_control_t new_data;
@@ -55,7 +63,49 @@ void parse_json(char *json_string_t, int string_length){
 		ESP_LOGI(TAG, "single command received");
 	}
 
-
 	printf("JSON String: %s length: %d\n", json_string_t, string_length);
 	cJSON_Delete(main_json_object); 			// es muss nur das main Objekt gelöscht werden, sub wird dann mit gelöscht
+	set_send_uplink_message_flag();
 }
+
+void send_uplink_message(){
+	device_control_t device_control = get_device_control_struct();
+	device_status_t device_status = get_device_status_struct();
+
+	cJSON *main_json_object = cJSON_CreateObject();
+	cJSON *sub_json_object = cJSON_CreateObject();
+	cJSON_AddItemToObject(main_json_object, "uplink_message", sub_json_object);
+	cJSON_AddItemToObject(sub_json_object, "main_power", cJSON_CreateBool(device_control.main_power));
+	cJSON_AddItemToObject(sub_json_object, "ion_power", cJSON_CreateBool(device_control.ion_power));
+	cJSON_AddItemToObject(sub_json_object, "uv_power", cJSON_CreateBool(device_control.uv_power));
+	cJSON_AddItemToObject(sub_json_object, "fan_power", cJSON_CreateNumber(device_control.fan_power));
+
+	cJSON_AddItemToObject(sub_json_object, "air_temerature", cJSON_CreateNumber(device_status.air_temperature));
+	cJSON_AddItemToObject(sub_json_object, "filter_hours", cJSON_CreateNumber(device_status.filter_hours));
+	cJSON_AddItemToObject(sub_json_object, "working_hours", cJSON_CreateNumber(device_status.working_hours));
+
+	cJSON_AddItemToObject(sub_json_object, "fan_powerjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj", cJSON_CreateNumber(7865));
+
+	mqtt_publish(cJSON_PrintUnformatted(main_json_object), "test/topic/uplink");
+	cJSON_Delete(main_json_object);
+	ESP_LOGI(TAG, "uplink message sheduled");
+	send_uplink_message_flag = false;
+}
+
+void json_main_task(void *arg){
+
+	while(1){
+
+		vTaskDelay(500/portTICK_RATE_MS);
+		if(true == send_uplink_message_flag){
+			send_uplink_message();
+		}
+
+	}
+}
+
+void create_json_task(){
+	xTaskCreate(json_main_task, "json task", 1024*3, NULL, 10, NULL);  // Stack overflow, der Task zum empfangen hat default 6kb 2kb sind zu wenig
+}
+
+

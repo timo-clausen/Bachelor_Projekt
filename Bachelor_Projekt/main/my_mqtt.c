@@ -30,6 +30,8 @@
 
 
 static const char *TAG = "my_mqtt";
+static esp_mqtt_client_handle_t mqtt_client = NULL;
+
 
 //#define CONFIG_BROKER_URI "mqtts://192.168.254.136:8883" SSID
 
@@ -65,6 +67,7 @@ static void send_binary(esp_mqtt_client_handle_t client)
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
     esp_mqtt_client_handle_t client = event->client;
+    mqtt_client = client;
     int msg_id;
     // your_context_t *context = event->context;
     switch (event->event_id) {
@@ -148,3 +151,16 @@ void mqtt_app_start(void)
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
     esp_mqtt_client_start(client);
 }
+
+void mqtt_publish(const char *data, const char *topic){
+	int msg_id;
+	if(NULL != mqtt_client){
+		msg_id = esp_mqtt_client_publish(mqtt_client, topic, data, 0, 1, 0);
+
+	}else{
+		ESP_LOGE(TAG, "MQTT Client not initialized");
+	}
+}
+
+
+

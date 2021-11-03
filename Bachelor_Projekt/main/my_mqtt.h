@@ -6,3 +6,4 @@
  */
 
 void mqtt_app_start(void);
+void mqtt_publish(const char *data, const char *topic);

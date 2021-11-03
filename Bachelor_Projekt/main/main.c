@@ -9,6 +9,8 @@
 
 #include "my_wifi.h"
 #include "my_mqtt.h"
+#include "device_control.h"
+#include "json_parser.h"
 
 
 static const char *TAG = "my_main";
@@ -54,7 +56,8 @@ void app_main(void)
 
     mqtt_app_start();
 
-
+    create_device_task();
+    create_json_task();
 
 
     gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
