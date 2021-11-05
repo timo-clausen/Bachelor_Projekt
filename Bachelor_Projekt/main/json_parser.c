@@ -71,6 +71,7 @@ void parse_json(char *json_string_t, int string_length){
 void send_uplink_message(){
 	device_control_t device_control = get_device_control_struct();
 	device_status_t device_status = get_device_status_struct();
+	char *json_string;
 
 	cJSON *main_json_object = cJSON_CreateObject();
 	cJSON *sub_json_object = cJSON_CreateObject();
@@ -86,9 +87,12 @@ void send_uplink_message(){
 
 	cJSON_AddItemToObject(sub_json_object, "fan_powerjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj", cJSON_CreateNumber(7865));
 
-	mqtt_publish(cJSON_PrintUnformatted(main_json_object), "test/topic/uplink");
+	json_string = malloc (sizeof(cJSON_PrintUnformatted(main_json_object)));
+	json_string = cJSON_PrintUnformatted(main_json_object);
+	mqtt_publish(json_string, "test/topic/uplink");
 	cJSON_Delete(main_json_object);
 	ESP_LOGI(TAG, "uplink message sheduled");
+	free(json_string);
 	send_uplink_message_flag = false;
 }
 

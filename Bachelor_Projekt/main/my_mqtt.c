@@ -69,6 +69,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     esp_mqtt_client_handle_t client = event->client;
     mqtt_client = client;
     int msg_id;
+    uint32_t free_heap_size=0, min_free_heap_size=0;
     // your_context_t *context = event->context;
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
@@ -82,6 +83,13 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
             break;
         case MQTT_EVENT_DISCONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+            //esp_mqtt_client_stop(client);
+            //mqtt_app_start();
+
+            free_heap_size = esp_get_free_heap_size();
+            min_free_heap_size = esp_get_minimum_free_heap_size();
+            printf("\n free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
+
             break;
 
         case MQTT_EVENT_SUBSCRIBED:
@@ -103,6 +111,10 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
                 send_binary(client);
             }
             parse_json(event->data, event->data_len);
+
+            free_heap_size = esp_get_free_heap_size();
+            min_free_heap_size = esp_get_minimum_free_heap_size();
+            printf("\n free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
             break;
         case MQTT_EVENT_ERROR:
             ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -138,8 +150,8 @@ void mqtt_app_start(void)
 		//.client_key_pem = (const char *)hivemq_mqtt_client_key_2_pem,
 		//.clientkey_password = "testPass",
 		//.clientkey_password_len = 8,
-		.username = "esp32",
-		.password = "esp32pw",
+		.username = "esp32_1",
+		.password = "esp32_1pw",
 
     };
     //printf((const char *)hivemq_server_cert_pem_start);
