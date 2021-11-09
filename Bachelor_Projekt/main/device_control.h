@@ -21,6 +21,11 @@ typedef struct{
 	uint32_t filter_hours;
 }device_status_t;
 
+typedef struct{
+	bool wifi_connected;
+	bool mqtt_connected;
+}connect_state_t;
+
 
 void set_new_data(device_control_t new_data);
 void set_main_power(bool main_power);
@@ -32,6 +37,8 @@ device_control_t get_device_control_struct();
 device_status_t get_device_status_struct();
 
 void create_device_task();
+void set_wifi_state(bool state);
+void set_mqtt_state(bool state);
 
 
 

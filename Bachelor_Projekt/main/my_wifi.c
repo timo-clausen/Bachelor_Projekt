@@ -24,6 +24,7 @@
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "device_control.h"
 
 
 
@@ -32,8 +33,8 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define ESP_WIFI_SSID       "Kristronics DSL"
-#define ESP_WIFI_PASSWORD       "c0mpan#freeDSL"
+#define ESP_WIFI_SSID       "ESP32_WiFi"
+#define ESP_WIFI_PASSWORD       "MYpassword"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  100
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -49,6 +50,9 @@ static const char *TAG = "my_wifi";
 
 static int s_retry_num = 0;
 
+esp_event_handler_instance_t instance_any_id;
+esp_event_handler_instance_t instance_got_ip;
+
 static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
@@ -56,16 +60,18 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+    	set_wifi_state(false);
         if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI(TAG, "retry to connect to the AP");
+            ESP_LOGI(TAG, "retry to connect to the AP, retry: %d", s_retry_num);
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
             ESP_LOGI(TAG,"connect to the AP fail");
         }
 
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    	set_wifi_state(true);
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
@@ -87,8 +93,7 @@ void wifi_init_sta(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
+
     //esp_event_handler_instance_t instance_sta_disc;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
@@ -100,16 +105,14 @@ void wifi_init_sta(void)
                                                         &event_handler,
                                                         NULL,
                                                         &instance_got_ip));
-    /*ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        WIFI_EVENT_STA_DISCONNECTED,
-                                                        &event_handler,
-                                                        NULL,
-                                                        &instance_sta_disc));*/
 
     wifi_config_t wifi_config = {
         .sta = {
             .ssid = ESP_WIFI_SSID ,
             .password = ESP_WIFI_PASSWORD ,
+			//.bssid = {0x24, 0x4b, 0xfe, 0x91, 0x02, 0x21} ,
+			//.bssid_set = true ,
+			//.listen_interval = 1 ,
             /* Setting a password implies station will connect to all security modes including WEP/WPA.
              * However these modes are deprecated and not advisable to be used. Incase your Access point
              * doesn't support WPA2, these mode can be enabled by commenting below line */
@@ -123,6 +126,7 @@ void wifi_init_sta(void)
     };
 
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+    ESP_ERROR_CHECK(esp_wifi_set_protocol(ESP_IF_WIFI_STA, 7)); // wifi mode bgn
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
@@ -152,5 +156,5 @@ void wifi_init_sta(void)
     /* The event will not be processed after unregister */
     //ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
     //ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
-    vEventGroupDelete(s_wifi_event_group);
+    //vEventGroupDelete(s_wifi_event_group);
 }

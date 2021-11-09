@@ -36,6 +36,7 @@ void set_log_levels(){
 void app_main(void)
 {
 
+	create_device_task();
 	set_log_levels();
 	//Initialize NVS aus wifi_connect netconn
 	esp_err_t ret = nvs_flash_init();
@@ -53,13 +54,8 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 	wifi_init_sta();
 
-
-
     mqtt_app_start();
-
-    create_device_task();
     create_json_task();
-
 
     gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
     int level = 0;
@@ -67,15 +63,13 @@ void app_main(void)
     while (true) {
         gpio_set_level(GPIO_NUM_4, level);
         level = !level;
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        vTaskDelay(60000 / portTICK_PERIOD_MS);
         //esp_wifi_get_country(&power_type);
         //ESP_LOGI(TAG, "power type: %d", power_type.max_tx_power);
         uint32_t free_heap_size=0, min_free_heap_size=0;
         free_heap_size = esp_get_free_heap_size();
         min_free_heap_size = esp_get_minimum_free_heap_size();
-        printf("\n  aus der main free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
-
-
+        printf("aus der main free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
     }
 }
 

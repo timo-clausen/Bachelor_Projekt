@@ -63,7 +63,7 @@ void parse_json(char *json_string_t, int string_length){
 		ESP_LOGI(TAG, "single command received");
 	}
 
-	printf("JSON String: %s length: %d\n", json_string_t, string_length);
+	//printf("JSON String: %s length: %d\n", json_string_t, string_length);
 	cJSON_Delete(main_json_object); 			// es muss nur das main Objekt gelöscht werden, sub wird dann mit gelöscht
 	set_send_uplink_message_flag();
 }
@@ -84,8 +84,6 @@ void send_uplink_message(){
 	cJSON_AddItemToObject(sub_json_object, "air_temerature", cJSON_CreateNumber(device_status.air_temperature));
 	cJSON_AddItemToObject(sub_json_object, "filter_hours", cJSON_CreateNumber(device_status.filter_hours));
 	cJSON_AddItemToObject(sub_json_object, "working_hours", cJSON_CreateNumber(device_status.working_hours));
-
-	cJSON_AddItemToObject(sub_json_object, "fan_powerjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj", cJSON_CreateNumber(7865));
 
 	json_string = malloc (sizeof(cJSON_PrintUnformatted(main_json_object)));
 	json_string = cJSON_PrintUnformatted(main_json_object);

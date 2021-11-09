@@ -27,7 +27,7 @@
 #include <sys/param.h>
 
 #include "json_parser.h"
-
+#include "device_control.h"
 
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
@@ -68,6 +68,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
     esp_mqtt_client_handle_t client = event->client;
     mqtt_client = client;
+
     int msg_id;
     uint32_t free_heap_size=0, min_free_heap_size=0;
     // your_context_t *context = event->context;
@@ -79,7 +80,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 
             //msg_id = esp_mqtt_client_publish(client, "test/topic", "data_3", 0, 1, 0);
-
+            set_mqtt_state(true);
             break;
         case MQTT_EVENT_DISCONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
@@ -89,7 +90,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
             free_heap_size = esp_get_free_heap_size();
             min_free_heap_size = esp_get_minimum_free_heap_size();
             printf("\n free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
-
+            set_mqtt_state(false);
             break;
 
         case MQTT_EVENT_SUBSCRIBED:
@@ -112,9 +113,9 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
             }
             parse_json(event->data, event->data_len);
 
-            free_heap_size = esp_get_free_heap_size();
-            min_free_heap_size = esp_get_minimum_free_heap_size();
-            printf("\n free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
+            //free_heap_size = esp_get_free_heap_size();
+            //min_free_heap_size = esp_get_minimum_free_heap_size();
+            //printf("\n free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
             break;
         case MQTT_EVENT_ERROR:
             ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -152,6 +153,8 @@ void mqtt_app_start(void)
 		//.clientkey_password_len = 8,
 		.username = "esp32_1",
 		.password = "esp32_1pw",
+		.reconnect_timeout_ms = 2000,
+		.keepalive = 60,
 
     };
     //printf((const char *)hivemq_server_cert_pem_start);
