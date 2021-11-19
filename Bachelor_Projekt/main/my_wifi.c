@@ -26,6 +26,8 @@
 #include "lwip/sys.h"
 #include "device_control.h"
 
+#include "driver/gpio.h"
+
 
 
 /* The examples use WiFi configuration that you can set via project configuration menu
@@ -33,9 +35,9 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define ESP_WIFI_SSID       "ESP32_WiFi"
-#define ESP_WIFI_PASSWORD       "MYpassword"
-#define EXAMPLE_ESP_MAXIMUM_RETRY  100
+#define ESP_WIFI_SSID       "ESP32_WiFi" //"Kristronics DSL"//
+#define ESP_WIFI_PASSWORD       "MYpassword" //"c0mpan#freeDSL"//
+#define EXAMPLE_ESP_MAXIMUM_RETRY  500
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -63,6 +65,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     	set_wifi_state(false);
         if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
+            gpio_set_level(18, true);
             s_retry_num++;
             ESP_LOGI(TAG, "retry to connect to the AP, retry: %d", s_retry_num);
         } else {
@@ -83,6 +86,10 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 
 void wifi_init_sta(void)
 {
+	gpio_reset_pin(18);
+	gpio_set_direction(18, GPIO_MODE_OUTPUT);
+	gpio_set_level(18, false);
+
     s_wifi_event_group = xEventGroupCreate();
 
     //ESP_ERROR_CHECK(esp_netif_init()); auskommentiert da in der main

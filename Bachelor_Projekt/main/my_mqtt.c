@@ -29,11 +29,15 @@
 #include "json_parser.h"
 #include "device_control.h"
 
+#define UPLOAD_TOPIC "test/topic/uplink"
+#define DOWNLOAD_TOPIC "test/topic"
+
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
 
 
 //#define CONFIG_BROKER_URI "mqtts://192.168.254.136:8883" SSID
+//#define CONFIG_BROKER_URI "mqtt://192.168.254.254:1883"
 
 
 #if CONFIG_BROKER_CERTIFICATE_OVERRIDDEN == 1
@@ -76,7 +80,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
 
-            msg_id = esp_mqtt_client_subscribe(client, "test/topic", 0);
+            msg_id = esp_mqtt_client_subscribe(client, DOWNLOAD_TOPIC, 1);
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 
             //msg_id = esp_mqtt_client_publish(client, "test/topic", "data_3", 0, 1, 0);
@@ -151,10 +155,12 @@ void mqtt_app_start(void)
 		//.client_key_pem = (const char *)hivemq_mqtt_client_key_2_pem,
 		//.clientkey_password = "testPass",
 		//.clientkey_password_len = 8,
-		.username = "esp32_1",
-		.password = "esp32_1pw",
+		.username = "esp32_2",
+		.password = "esp32_2pw",
 		.reconnect_timeout_ms = 2000,
-		.keepalive = 60,
+		.keepalive = 160,
+		.disable_clean_session = true, 			// verpasse Nachrichten werden später zugestellt, aber will man das?
+		//.disable_auto_reconnect = true,
 
     };
     //printf((const char *)hivemq_server_cert_pem_start);
@@ -167,10 +173,10 @@ void mqtt_app_start(void)
     esp_mqtt_client_start(client);
 }
 
-void mqtt_publish(const char *data, const char *topic){
+void mqtt_publish(const char *data){
 	int msg_id;
 	if(NULL != mqtt_client){
-		msg_id = esp_mqtt_client_publish(mqtt_client, topic, data, 0, 1, 0);
+		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_TOPIC, data, 0, 1, 0);
 
 	}else{
 		ESP_LOGE(TAG, "MQTT Client not initialized");

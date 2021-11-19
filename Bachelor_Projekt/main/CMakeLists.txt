@@ -2,7 +2,7 @@
 set(COMPONENT_REQUIRES )
 set(COMPONENT_PRIV_REQUIRES )
 
-set(COMPONENT_SRCS "main.c" "my_wifi.c" "my_mqtt.c" "device_control.c" "json_parser.c" )
+set(COMPONENT_SRCS "main.c" "my_wifi.c" "my_mqtt.c" "device_control.c" "json_parser.c" "measurements.c" )
 set(COMPONENT_ADD_INCLUDEDIRS "")
 
 register_component()

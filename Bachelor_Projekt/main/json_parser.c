@@ -87,7 +87,7 @@ void send_uplink_message(){
 
 	json_string = malloc (sizeof(cJSON_PrintUnformatted(main_json_object)));
 	json_string = cJSON_PrintUnformatted(main_json_object);
-	mqtt_publish(json_string, "test/topic/uplink");
+	mqtt_publish(json_string);
 	cJSON_Delete(main_json_object);
 	ESP_LOGI(TAG, "uplink message sheduled");
 	free(json_string);
@@ -100,7 +100,7 @@ void json_main_task(void *arg){
 
 		vTaskDelay(500/portTICK_RATE_MS);
 		if(true == send_uplink_message_flag){
-			send_uplink_message();
+			//send_uplink_message();
 		}
 
 	}

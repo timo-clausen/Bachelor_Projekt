@@ -11,6 +11,7 @@
 #include "my_mqtt.h"
 #include "device_control.h"
 #include "json_parser.h"
+#include "measurements.h"
 
 
 static const char *TAG = "my_main";
@@ -56,14 +57,15 @@ void app_main(void)
 
     mqtt_app_start();
     create_json_task();
+    create_measurements_task();
 
     gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
     int level = 0;
     //wifi_country_t power_type;
     while (true) {
-        gpio_set_level(GPIO_NUM_4, level);
+        //gpio_set_level(GPIO_NUM_4, level);
         level = !level;
-        vTaskDelay(60000 / portTICK_PERIOD_MS);
+        vTaskDelay(300000 / portTICK_PERIOD_MS);
         //esp_wifi_get_country(&power_type);
         //ESP_LOGI(TAG, "power type: %d", power_type.max_tx_power);
         uint32_t free_heap_size=0, min_free_heap_size=0;

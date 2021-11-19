@@ -179,7 +179,7 @@ void set_mqtt_state(bool state){
 
 void device_main_task(void *arg) {
 
-	xTaskCreate(led_task, "LED Task", 1024 * 2, NULL, 10, &led_task_handl);
+
 
 	while (1) {
 		vTaskDelay(10 / portTICK_RATE_MS);
@@ -196,6 +196,7 @@ void device_main_task(void *arg) {
 void create_device_task() {
 	prerare_io_ports();
 	xTaskCreate(device_main_task, "device task", 1024 * 2, NULL, 10, NULL);
+	xTaskCreate(led_task, "LED Task", 1024 * 2, NULL, 10, &led_task_handl);
 }
 
 
