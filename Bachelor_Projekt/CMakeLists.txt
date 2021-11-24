@@ -1,3 +1,5 @@
+
+set(PROJECT_VER "1.0")
 # The following lines of boilerplate have to be in your project's
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
@@ -12,3 +14,4 @@ project(app-template)
 target_add_binary_data(app-template.elf "main/hivemq-server-cert.pem" TEXT)
 target_add_binary_data(app-template.elf "main/mqtt-client-cert-2.pem" TEXT)
 target_add_binary_data(app-template.elf "main/mqtt-client-key-2.pem" TEXT)
+target_add_binary_data(app-template.elf "main/ca_cert.pem" TEXT)

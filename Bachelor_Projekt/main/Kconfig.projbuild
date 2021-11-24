@@ -41,3 +41,31 @@ menu "MQTT Configuration"
         default 20000
 
 endmenu
+
+menu "OTA Update Configuration"
+
+    config FIRMWARE_UPGRADE_URL
+        string "Firmware Upgrade URL"
+        default "https://192.168.2.106:8070/hello-world.bin"
+        help
+            URL of server which hosts the firmware image.
+
+    config SKIP_COMMON_NAME_CHECK
+        bool "Skip server certificate CN fieldcheck"
+        default n
+        help
+            This allows you to skip the validation of OTA server certificate CN field.
+
+    config SKIP_VERSION_CHECK
+        bool "Skip firmware version check"
+        default n
+        help
+            This allows you to skip the firmware version check.
+
+    config OTA_RECV_TIMEOUT
+        int "OTA Receive Timeout"
+        default 5000
+        help
+            Maximum time for reception
+
+endmenu

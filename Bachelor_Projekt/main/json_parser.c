@@ -16,6 +16,8 @@
 #include "freertos/task.h"
 #include "my_mqtt.h"
 
+#include "ota_update.h"
+
 
 static const char *TAG = "json_parser";
 static bool send_uplink_message_flag = false;
@@ -45,6 +47,8 @@ void parse_single_command(cJSON *sub_json_object){
 
 	}else if(cJSON_HasObjectItem(sub_json_object, "fan_power")){
 		set_fan_power(cJSON_GetObjectItem(sub_json_object, "fan_power")->valueint);
+	}else if(cJSON_HasObjectItem(sub_json_object, "start_ota_update")){
+		start_ota_task(cJSON_IsTrue(cJSON_GetObjectItem(sub_json_object, "start_ota_update")));
 	}
 
 }

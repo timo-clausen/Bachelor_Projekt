@@ -12,6 +12,7 @@
 #include "device_control.h"
 #include "json_parser.h"
 #include "measurements.h"
+#include "ota_update.h"
 
 
 static const char *TAG = "my_main";
@@ -55,6 +56,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 	wifi_init_sta();
 
+	//start_ota_task();
     mqtt_app_start();
     create_json_task();
     create_measurements_task();
