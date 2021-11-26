@@ -6,3 +6,4 @@
  */
 
 void start_ota_task(bool start_task);
+void set_new_ota_image_as_valid(void);

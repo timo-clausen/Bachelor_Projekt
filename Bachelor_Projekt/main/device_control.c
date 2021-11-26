@@ -12,14 +12,15 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-#define IO_UV_PIN 15
-#define IO_IONIC_PIN 2
-#define IO_MAIN_PIN 4
-#define IO_MODE_LED1_PIN 25
-#define IO_MODE_LED2_PIN 26
-#define IO_MODE_LED3_PIN 27
-#define IO_MODE_LED4_PIN 14
-#define IO_MODE_LED5_PIN 12
+
+#define IO_UV_PIN 21
+#define IO_IONIC_PIN 22
+#define IO_MAIN_PIN 23
+#define IO_MODE_LED1_PIN 19
+#define IO_MODE_LED2_PIN 18
+#define IO_MODE_LED3_PIN 5
+#define IO_MODE_LED4_PIN 17
+#define IO_MODE_LED5_PIN 16
 
 static TaskHandle_t led_task_handl;
 static bool new_data_flag = false;

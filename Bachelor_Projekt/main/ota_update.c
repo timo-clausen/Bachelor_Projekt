@@ -150,9 +150,6 @@ ota_end:
 void start_ota_task(bool start_task)
 {
 
-
-
-
 //#if CONFIG_EXAMPLE_CONNECT_WIFI
     /* Ensure to disable any WiFi power save mode, this allows best throughput
      * and hence timings for overall OTA operation.
@@ -165,4 +162,8 @@ void start_ota_task(bool start_task)
     }else{
     	ESP_LOGW(TAG, "Start OTA Task flag isn't set");
     }
+}
+
+void set_new_ota_image_as_valid(void){
+	esp_ota_mark_app_valid_cancel_rollback();
 }
