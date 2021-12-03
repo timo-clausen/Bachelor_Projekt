@@ -39,6 +39,7 @@ device_status_t get_device_status_struct();
 void create_device_task();
 void set_wifi_state(bool state);
 void set_mqtt_state(bool state);
+void set_device_status(double air_temperature, uint32_t filter_hours, uint32_t working_hours);
 
 
 

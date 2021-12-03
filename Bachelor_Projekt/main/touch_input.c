@@ -64,16 +64,17 @@ bool pad_is_aktiv(uint8_t pad_nr){
 	touch_pad_get_thresh(pad_nr, &threshold);
 
 	flag1 = touch_value1 < (threshold);
-	vTaskDelay(50/portTICK_PERIOD_MS);
+	vTaskDelay(100/portTICK_PERIOD_MS);
 	touch_pad_read_filtered(pad_nr, &touch_value2);
 	flag2 = touch_value2 < (threshold);
-	ESP_LOGW(TAG, "threshold: %d, v1: %d, v2: %d, vT: %d, f1: %d, f2: %d", threshold, touch_value1, touch_value2, testValue, flag1, flag2);
+	//ESP_LOGW(TAG, "threshold: %d, v1: %d, v2: %d, vT: %d, f1: %d, f2: %d", threshold, touch_value1, touch_value2, testValue, flag1, flag2);
 	return flag1 || flag2;
 
 
 }
 
-void set_command(void *arg){
+
+void set_command_task(void *arg){
 	uint8_t pushed_pad = (uint8_t)arg;
 	device_control_t current_state;
 	current_state = get_device_control_struct();
@@ -81,27 +82,35 @@ void set_command(void *arg){
 	switch(pushed_pad){
 		case(TOUCH_PAD_FAN1):
 			ESP_LOGI(TAG, "case 1");
+			set_fan_power(1);
 			break;
 		case(TOUCH_PAD_FAN2):
 			ESP_LOGI(TAG, "case 2");
+			set_fan_power(2);
 			break;
 		case(TOUCH_PAD_FAN3):
 			ESP_LOGI(TAG, "case 3");
+			set_fan_power(3);
 			break;
 		case(TOUCH_PAD_FAN4):
 			ESP_LOGI(TAG, "case 4");
+			set_fan_power(4);
 			break;
 		case(TOUCH_PAD_FAN5):
 			ESP_LOGI(TAG, "case 5");
+			set_fan_power(5);
 			break;
 		case(TOUCH_PAD_MAIN_POWER):
 			ESP_LOGI(TAG, "case main");
+			set_main_power(!current_state.main_power);
 			break;
 		case(TOUCH_PAD_UV_POWER):
 			ESP_LOGI(TAG, "case uv");
+			set_uv_power(!current_state.uv_power);
 			break;
 		case(TOUCH_PAD_ION_POWER):
 			ESP_LOGI(TAG, "case ion");
+			set_ion_power(!current_state.ion_power);
 			break;
 		default:
 			break;
@@ -131,65 +140,34 @@ void touch_pad_isr(void *arg){
         if ((pad_intr >> i) & 0x01) {
             //s_pad_activated[i] = true;
 
-        	xTaskCreate(set_command, "touch_set_command", 1024*2, (void*)i, 10, NULL);
+        	xTaskCreate(set_command_task, "touch_set_command_task", 1024*2, (void*)i, 10, NULL);
         }
     }
 }
 
 
-
-
-
-
-
-void init_touch_interface(){
+void touch_init_task(void *arg){
 	ESP_ERROR_CHECK(touch_pad_init());
 	touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
 	touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
 	touch_pad_filter_start(TOUCHPAD_FILTER_TOUCH_PERIOD);
 	init_touch_pads();
+
 	vTaskDelay(1000/portTICK_RATE_MS);
 	set_tresholds();
 	touch_pad_isr_register(touch_pad_isr, NULL);
 	touch_pad_intr_enable();
 
+	vTaskDelete(xTaskGetCurrentTaskHandle());
+}
+
+
+void init_touch_interface(){
+
+
+	xTaskCreate(touch_init_task, "touch_init_task", 1024*2, NULL, 10, NULL);
 	gpio_reset_pin(26);
 	gpio_set_direction(26, GPIO_MODE_OUTPUT);
 }
 
-/*
-void read_touch(void *arg){
-	uint16_t value = 0;
-	vTaskDelay(1000/portTICK_RATE_MS);
-	set_tresholds();
-	touch_pad_isr_register(touch_pad_isr, NULL);
-	touch_pad_intr_enable();
 
-	while(1){
-		vTaskDelay(100/portTICK_RATE_MS);
-		for (uint8_t i = 0; i < TOUCH_PAD_MAX; i++) {
-			if (s_pad_activated[i] == true) {
-				set_command(i);
-				pad_released = false;
-				touch_pad_read_filtered(i, &value);
-				ESP_LOGI(TAG, "value: %d; init val: %d", value, s_pad_init_val[i]);
-				ESP_LOGI(TAG, "T%d activated!", i);
-				s_pad_activated[i] = false;
-			}
-		}
-	}
-}
-
-
-void create_touch_task(void){
-
-	ESP_ERROR_CHECK(touch_pad_init());
-	touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
-	touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
-	touch_pad_filter_start(TOUCHPAD_FILTER_TOUCH_PERIOD);
-	init_touch_pads();
-
-	xTaskCreate(read_touch, "read_touch", 1024*2, NULL, 10, NULL);
-
-}
-*/

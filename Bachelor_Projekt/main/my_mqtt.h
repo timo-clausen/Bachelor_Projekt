@@ -6,4 +6,5 @@
  */
 
 void mqtt_app_start(void);
-void mqtt_publish(const char *data);
+void mqtt_publish_status(const char *data);
+void mqtt_publish_db(const char *data);

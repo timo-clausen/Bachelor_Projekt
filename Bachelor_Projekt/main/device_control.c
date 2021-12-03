@@ -47,16 +47,22 @@ void set_main_power(bool main_power) {
 	set_new_data_flag();
 }
 void set_ion_power(bool ion_power) {
-	device_control.ion_power = ion_power;
-	set_new_data_flag();
+	if(true == device_control.main_power){
+		device_control.ion_power = ion_power;
+		set_new_data_flag();
+	}
 }
 void set_uv_power(bool uv_power) {
-	device_control.uv_power = uv_power;
-	set_new_data_flag();
+	if(true == device_control.main_power){
+		device_control.uv_power = uv_power;
+		set_new_data_flag();
+	}
 }
 void set_fan_power(uint8_t fan_power) {
-	device_control.fan_power = fan_power;
-	set_new_data_flag();
+	if(true == device_control.main_power){
+		device_control.fan_power = fan_power;
+		set_new_data_flag();
+	}
 }
 
 void set_new_data(device_control_t new_data) {
@@ -66,6 +72,12 @@ void set_new_data(device_control_t new_data) {
 	device_control.fan_power = new_data.fan_power;
 
 	set_new_data_flag();
+}
+
+void set_device_status(double air_temperature, uint32_t filter_hours, uint32_t working_hours){
+	device_status.air_temperature = air_temperature;
+	device_status.filter_hours = filter_hours;
+	device_status.working_hours = working_hours;
 }
 
 device_control_t get_device_control_struct() {
@@ -185,14 +197,16 @@ void device_main_task(void *arg) {
 	while (1) {
 		vTaskDelay(10 / portTICK_RATE_MS);
 		//ESP_LOGI(TAG, "device task");
-		device_status.air_temperature = 21.7;
-		device_status.working_hours++;
-		device_status.filter_hours = 26;
+		//device_status.air_temperature = 21.7;
+		//device_status.working_hours++;
+		//device_status.filter_hours = 26;
 		if (true == new_data_flag) {
 			adjust_io_ports();
 		}
 	}
 }
+
+
 
 void create_device_task() {
 	prerare_io_ports();

@@ -6,5 +6,5 @@
  */
 
 
-void create_touch_task(void);
+//void create_touch_task(void);
 void init_touch_interface(void);

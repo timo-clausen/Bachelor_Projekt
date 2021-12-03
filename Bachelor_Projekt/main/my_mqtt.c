@@ -30,7 +30,8 @@
 #include "device_control.h"
 
 #define UPLOAD_TOPIC "test/topic/uplink"
-#define DOWNLOAD_TOPIC "test/topic"
+#define DOWNLOAD_TOPIC "test/topic/downlink"
+#define UPLOAD_DB	"db/device_nr"
 
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
@@ -159,7 +160,7 @@ void mqtt_app_start(void)
 		.password = "esp32_2pw",
 		.reconnect_timeout_ms = 2000,
 		.keepalive = 160,
-		.disable_clean_session = true, 			// verpasse Nachrichten werden später zugestellt, aber will man das?
+		.disable_clean_session = true, 			// verpasse Nachrichten werden später zugestellt, aber will man das? Und qos 0 kann nicht veröffentlicht werden
 		//.disable_auto_reconnect = true,
 
     };
@@ -173,15 +174,25 @@ void mqtt_app_start(void)
     esp_mqtt_client_start(client);
 }
 
-void mqtt_publish(const char *data){
+void mqtt_publish_status(const char *data){
+	static uint8_t qos = 1;
 	int msg_id;
 	if(NULL != mqtt_client){
-		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_TOPIC, data, 0, 1, 0);
+		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_TOPIC, data, 0, qos, 0);
 
 	}else{
 		ESP_LOGE(TAG, "MQTT Client not initialized");
 	}
 }
 
+void mqtt_publish_db(const char *data){
+	static uint8_t qos = 1;				// qos 0 geht nicht bei clean session
+	int msg_id;
+	if(NULL != mqtt_client){
+		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_DB, data, 0, qos, 0);
 
+	}else{
+		ESP_LOGE(TAG, "MQTT Client not initialized");
+	}
+}
 

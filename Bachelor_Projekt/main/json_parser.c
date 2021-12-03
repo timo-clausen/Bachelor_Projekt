@@ -20,10 +20,15 @@
 
 
 static const char *TAG = "json_parser";
-static bool send_uplink_message_flag = false;
+static bool send_status_feedback_flag = false;
+static bool send_status_db_flag = false;
 
-void set_send_uplink_message_flag(){
-	send_uplink_message_flag = true;
+void set_send_status_feedback_flag(){
+	send_status_feedback_flag = true;
+}
+
+void set_send_status_db_flag(){
+	send_status_db_flag = true;
 }
 
 void parse_status_command(cJSON *sub_json_object) {
@@ -66,13 +71,19 @@ void parse_json(char *json_string_t, int string_length){
 		parse_single_command(sub_json_object);
 		ESP_LOGI(TAG, "single command received");
 	}
+	
+	if(cJSON_HasObjectItem(main_json_object, "status_feedback_required")){
+		if(cJSON_IsTrue(cJSON_GetObjectItem(main_json_object, "status_feedback_required"))){
+			set_send_status_feedback_flag();
+		}
+	}
 
 	//printf("JSON String: %s length: %d\n", json_string_t, string_length);
 	cJSON_Delete(main_json_object); 			// es muss nur das main Objekt gelöscht werden, sub wird dann mit gelöscht
-	set_send_uplink_message_flag();
+	
 }
 
-void send_uplink_message(){
+void send_status_feedback(){
 	device_control_t device_control = get_device_control_struct();
 	device_status_t device_status = get_device_status_struct();
 	char *json_string;
@@ -85,33 +96,56 @@ void send_uplink_message(){
 	cJSON_AddItemToObject(sub_json_object, "uv_power", cJSON_CreateBool(device_control.uv_power));
 	cJSON_AddItemToObject(sub_json_object, "fan_power", cJSON_CreateNumber(device_control.fan_power));
 
-	cJSON_AddItemToObject(sub_json_object, "air_temerature", cJSON_CreateNumber(device_status.air_temperature));
+	cJSON_AddItemToObject(sub_json_object, "air_temperature", cJSON_CreateNumber(device_status.air_temperature));
 	cJSON_AddItemToObject(sub_json_object, "filter_hours", cJSON_CreateNumber(device_status.filter_hours));
 	cJSON_AddItemToObject(sub_json_object, "working_hours", cJSON_CreateNumber(device_status.working_hours));
 
 	json_string = malloc (sizeof(cJSON_PrintUnformatted(main_json_object)));
 	json_string = cJSON_PrintUnformatted(main_json_object);
-	mqtt_publish(json_string);
+	mqtt_publish_status(json_string);
 	cJSON_Delete(main_json_object);
-	ESP_LOGI(TAG, "uplink message sheduled");
+	ESP_LOGI(TAG, "uplink status feedback message sheduled");
 	free(json_string);
-	send_uplink_message_flag = false;
+	send_status_feedback_flag = false;
 }
+
+void send_status_db(){
+	device_status_t device_status = get_device_status_struct();
+	char *json_string;
+	cJSON *main_json_object = cJSON_CreateObject();
+	cJSON *sub_json_object = cJSON_CreateObject();
+	cJSON_AddItemToObject(main_json_object, "uplink_db", sub_json_object);
+	cJSON_AddItemToObject(sub_json_object, "air_temperature", cJSON_CreateNumber(device_status.air_temperature));
+	cJSON_AddItemToObject(sub_json_object, "filter_hours", cJSON_CreateNumber(device_status.filter_hours));
+	cJSON_AddItemToObject(sub_json_object, "working_hours", cJSON_CreateNumber(device_status.working_hours));
+
+	json_string = malloc (sizeof(cJSON_PrintUnformatted(main_json_object)));
+	json_string = cJSON_PrintUnformatted(main_json_object);
+	mqtt_publish_db(json_string);
+	cJSON_Delete(main_json_object);
+	free(json_string);
+	send_status_db_flag = false;
+}
+
 
 void json_main_task(void *arg){
 
 	while(1){
 
 		vTaskDelay(500/portTICK_RATE_MS);
-		if(true == send_uplink_message_flag){
-			//send_uplink_message();
+		if(true == send_status_feedback_flag){
+			send_status_feedback();
+		}
+
+		if (true == send_status_db_flag){
+			send_status_db();
 		}
 
 	}
 }
 
 void create_json_task(){
-	xTaskCreate(json_main_task, "json task", 1024*3, NULL, 10, NULL);  // Stack overflow, der Task zum empfangen hat default 6kb 2kb sind zu wenig
+	xTaskCreate(json_main_task, "json task", 1024*6, NULL, 10, NULL);  // Stack overflow, der Task zum empfangen hat default 6kb 2kb sind zu wenig
 }
 
 
