@@ -60,10 +60,11 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     init_touch_interface();
+    create_measurements_task();
 	wifi_init_sta();
     mqtt_app_start();
     create_json_task();
-    create_measurements_task();
+
 
 
     set_new_ota_image_as_valid();

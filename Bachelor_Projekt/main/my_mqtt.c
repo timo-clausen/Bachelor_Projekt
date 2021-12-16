@@ -29,13 +29,19 @@
 #include "json_parser.h"
 #include "device_control.h"
 
-#define UPLOAD_TOPIC "test/topic/uplink"
-#define DOWNLOAD_TOPIC "test/topic/downlink"
-#define UPLOAD_DB	"db/device_nr"
+#define UPLOAD_TOPIC	upload_topic //"test/topic/uplink"
+#define DOWNLOAD_TOPIC download_topic //"test/topic/downlink"
+#define UPLOAD_DB	upload_db_topic //"db/device_nr"
 
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
 
+static char *basic_upload_topic = "test/topic/uplink";
+static char *upload_topic;
+static char *basic_download_topic = "test/topic/downlink";
+static char *download_topic;
+static char *basic_upload_db_topic = "db/device_nr";
+static char *upload_db_topic;
 
 //#define CONFIG_BROKER_URI "mqtts://192.168.254.136:8883" SSID
 //#define CONFIG_BROKER_URI "mqtt://192.168.254.254:1883"
@@ -74,12 +80,15 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     esp_mqtt_client_handle_t client = event->client;
     mqtt_client = client;
 
+    uint8_t mac[8];
     int msg_id;
     uint32_t free_heap_size=0, min_free_heap_size=0;
     // your_context_t *context = event->context;
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+            esp_efuse_mac_get_default(&mac);
+            //printf(*mac);
 
             msg_id = esp_mqtt_client_subscribe(client, DOWNLOAD_TOPIC, 1);
             ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
@@ -167,6 +176,27 @@ void mqtt_app_start(void)
     //printf((const char *)hivemq_server_cert_pem_start);
     //printf(" das sind die daten\n");
 
+    //printf("der ESP: \n");
+   // printf(mqtt_cfg.client_id);
+    //printf("\n");
+
+    static char chipid[6];
+    esp_efuse_mac_get_default(&chipid);
+    char *string_chipid = (char*) malloc(sizeof(char)*25);
+    sprintf(string_chipid, "/ESP32_%02x%02x%02x", chipid[3], chipid[4], chipid[5]);
+
+    upload_topic = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_upload_topic)+1));
+    sprintf(upload_topic, "%s%s", basic_upload_topic, string_chipid);
+    download_topic = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_download_topic)+1));
+    printf("chipid: %d, topic: %d\n", strlen(string_chipid), strlen(basic_download_topic));
+    sprintf(download_topic, "%s%s", basic_download_topic, string_chipid);
+    upload_db_topic = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_upload_db_topic)+1));
+    sprintf(upload_db_topic, "%s%s", basic_upload_db_topic, string_chipid);
+
+    ESP_LOGI(TAG, "Upload Topic: %s", upload_topic);
+    ESP_LOGI(TAG, "Download Topic: %s", download_topic);
+    ESP_LOGI(TAG, "Upload DB Topic: %s", upload_db_topic);
+
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
@@ -186,7 +216,7 @@ void mqtt_publish_status(const char *data){
 }
 
 void mqtt_publish_db(const char *data){
-	static uint8_t qos = 1;				// qos 0 geht nicht bei clean session
+	static uint8_t qos = 0;				// qos 0 geht nicht bei clean session, irgendwie doch
 	int msg_id;
 	if(NULL != mqtt_client){
 		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_DB, data, 0, qos, 0);

@@ -104,11 +104,12 @@ void measurements_task(void)
 
     //Continuously sample ADC1
     while (1) {
+    	vTaskDelay(pdMS_TO_TICKS(60000));
     	temperature = measure_air_temperature();
     	working_hours = get_device_status_struct().working_hours;
         set_device_status(temperature, 60, ++working_hours);			// jetzt natürlich min
         set_send_status_db_flag();
-        vTaskDelay(pdMS_TO_TICKS(60000));
+
     }
 }
 
