@@ -79,7 +79,7 @@ double measure_air_temperature(){
 	}
 	adc_reading /= NO_OF_SAMPLES;
 	//Convert adc_reading to voltage in mV
-	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars)-60;
+	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars)-60;  //-60  draußen ohne
 	double temperature = (voltage*28.9)/1000-22.5;
 	printf("Raw: %d\tVoltage: %dmV\t T: %.2f C\n", adc_reading, voltage, temperature);
 	return temperature;
@@ -102,13 +102,15 @@ void measurements_task(void)
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(unit, atten, width, DEFAULT_VREF, adc_chars);
     print_char_val_type(val_type);
 
+    vTaskDelay(pdMS_TO_TICKS(5000));
     //Continuously sample ADC1
     while (1) {
-    	vTaskDelay(pdMS_TO_TICKS(60000));
+
     	temperature = measure_air_temperature();
     	working_hours = get_device_status_struct().working_hours;
         set_device_status(temperature, 60, ++working_hours);			// jetzt natürlich min
         set_send_status_db_flag();
+        vTaskDelay(pdMS_TO_TICKS(60000));
 
     }
 }

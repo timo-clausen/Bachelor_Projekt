@@ -36,9 +36,9 @@
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
 
-static char *basic_upload_topic = "test/topic/uplink";
+static char *basic_upload_topic = "device/nr/uplink";
 static char *upload_topic;
-static char *basic_download_topic = "test/topic/downlink";
+static char *basic_download_topic = "device/nr/downlink";
 static char *download_topic;
 static char *basic_upload_db_topic = "db/device_nr";
 static char *upload_db_topic;

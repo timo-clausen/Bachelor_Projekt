@@ -35,8 +35,8 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define ESP_WIFI_SSID      "ESP32_WiFi" // "Martin_Router_King" //"Kristronics DSL"//
-#define ESP_WIFI_PASSWORD      "MYpassword" // "04957046874453038517" //"MYpassword" //"c0mpan#freeDSL"//
+#define ESP_WIFI_SSID     "ESP32_WiFi" // "Kristronics DSL"// "ESP32_WiFi" // "Martin_Router_King" //
+#define ESP_WIFI_PASSWORD     "MYpassword" //	"c0mpan#freeDSL"// "MYpassword" // "04957046874453038517" //"MYpassword" //"c0mpan#freeDSL"//
 #define EXAMPLE_ESP_MAXIMUM_RETRY  500
 
 /* FreeRTOS event group to signal when we are connected*/
