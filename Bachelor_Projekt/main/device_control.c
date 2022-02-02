@@ -34,7 +34,7 @@ static const char *TAG = "device_control";
 
 void set_new_data_flag() {
 	new_data_flag = true;
-	ESP_LOGI(TAG, "neue Steuerdaten erhalten");
+	//ESP_LOGI(TAG, "neue Steuerdaten erhalten");
 	printf("main_power: %d, ", device_control.main_power);
 	printf("ion_power: %d, ", device_control.ion_power);
 	printf("uv_power: %d, ", device_control.uv_power);

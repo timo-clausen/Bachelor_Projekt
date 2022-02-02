@@ -74,8 +74,6 @@ void app_main(void)
         min_free_heap_size = esp_get_minimum_free_heap_size();
         printf("aus der main free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
         vTaskDelay(300000 / portTICK_PERIOD_MS);
-
-
     }
 }
 
