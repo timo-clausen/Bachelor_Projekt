@@ -34,7 +34,7 @@ static const char *TAG = "device_control";
 
 void set_new_data_flag() {
 	new_data_flag = true;
-	//ESP_LOGI(TAG, "neue Steuerdaten erhalten");
+	ESP_LOGI(TAG, "neue Steuerdaten erhalten");
 	printf("main_power: %d, ", device_control.main_power);
 	printf("ion_power: %d, ", device_control.ion_power);
 	printf("uv_power: %d, ", device_control.uv_power);
@@ -87,6 +87,12 @@ device_control_t get_device_control_struct() {
 device_status_t get_device_status_struct() {
 	return device_status;
 }
+
+bool is_mqtt_connected(){
+	return connect_state.mqtt_connected;
+}
+
+
 void mode_leds_off() {
 	gpio_set_level(IO_MODE_LED5_PIN, false);
 	gpio_set_level(IO_MODE_LED4_PIN, false);
@@ -126,7 +132,7 @@ void prerare_io_ports() {
 
 void adjust_io_ports() {
 
-	//ESP_LOGI(TAG, "adjust oi Prots");
+	//ESP_LOGI(TAG, "adjust IO Ports");
 	new_data_flag = false;
 	if (false == device_control.main_power) {
 		switch_off();
@@ -190,16 +196,10 @@ void set_mqtt_state(bool state){
 }
 
 
-void device_main_task(void *arg) {
-
-
+void device_task(void *arg) {
 
 	while (1) {
 		vTaskDelay(10 / portTICK_RATE_MS);
-		//ESP_LOGI(TAG, "device task");
-		//device_status.air_temperature = 21.7;
-		//device_status.working_hours++;
-		//device_status.filter_hours = 26;
 		if (true == new_data_flag) {
 			adjust_io_ports();
 		}
@@ -210,7 +210,7 @@ void device_main_task(void *arg) {
 
 void create_device_task() {
 	prerare_io_ports();
-	xTaskCreate(device_main_task, "device task", 1024 * 2, NULL, 10, NULL);
+	xTaskCreate(device_task, "device task", 1024 * 2, NULL, 10, NULL);
 	xTaskCreate(led_task, "LED Task", 1024 * 2, NULL, 10, &led_task_handl);
 }
 

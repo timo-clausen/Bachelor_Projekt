@@ -8,9 +8,6 @@
 #include "my_wifi.h"
 #include <stdio.h>
 
-
-
-
 #include <string.h>
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -30,13 +27,8 @@
 
 
 
-/* The examples use WiFi configuration that you can set via project configuration menu
-
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
-*/
-#define ESP_WIFI_SSID     "ESP32_WiFi" // "Kristronics DSL"// "ESP32_WiFi" // "Martin_Router_King" //
-#define ESP_WIFI_PASSWORD     "MYpassword" //	"c0mpan#freeDSL"// "MYpassword" // "04957046874453038517" //"MYpassword" //"c0mpan#freeDSL"//
+#define ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
+#define ESP_WIFI_PASSWORD CONFIG_ESP_WIFI_PASSWORD
 #define EXAMPLE_ESP_MAXIMUM_RETRY  500
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -71,7 +63,6 @@ static void event_handler(void* arg, esp_event_base_t event_base,
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
             ESP_LOGI(TAG,"connect to the AP fail");
         }
-
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     	set_wifi_state(true);
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
@@ -87,19 +78,12 @@ void wifi_init_sta(void)
 {
 	gpio_reset_pin(18);
 	gpio_set_direction(18, GPIO_MODE_OUTPUT);
-
     s_wifi_event_group = xEventGroupCreate();
-
-    //ESP_ERROR_CHECK(esp_netif_init()); auskommentiert da in der main
-    //ESP_ERROR_CHECK(esp_event_loop_create_default());
-
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-
-    //esp_event_handler_instance_t instance_sta_disc;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
                                                         &event_handler,

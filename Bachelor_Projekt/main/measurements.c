@@ -14,14 +14,6 @@
 
 static const char *TAG = "measurements";
 
-/* ADC1 Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "freertos/FreeRTOS.h"
@@ -30,12 +22,12 @@ static const char *TAG = "measurements";
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 
-#define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
-#define NO_OF_SAMPLES   64          //Multisampling
+#define DEFAULT_VREF    1100
+#define NO_OF_SAMPLES   64
 
 static esp_adc_cal_characteristics_t *adc_chars;
 
-static const adc_channel_t channel = ADC_CHANNEL_6;     //GPIO34 if ADC1, GPIO14 if ADC2
+static const adc_channel_t channel = ADC_CHANNEL_6;     //GPIO34 ADC1, GPIO14 ADC2
 static const adc_bits_width_t width = ADC_WIDTH_BIT_12;
 
 static const adc_atten_t atten = ADC_ATTEN_DB_11;
@@ -73,13 +65,11 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
 
 double measure_air_temperature(){
 	uint32_t adc_reading = 0;
-	//Multisampling
 	for (int i = 0; i < NO_OF_SAMPLES; i++) {
 		adc_reading += adc1_get_raw((adc1_channel_t)channel);
 	}
 	adc_reading /= NO_OF_SAMPLES;
-	//Convert adc_reading to voltage in mV
-	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars)-60;  //-60  draußen ohne
+	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
 	double temperature = (voltage*28.9)/1000-22.5;
 	printf("Raw: %d\tVoltage: %dmV\t T: %.2f C\n", adc_reading, voltage, temperature);
 	return temperature;
@@ -93,7 +83,6 @@ void measurements_task(void)
     check_efuse();
 
     //Configure ADC
-
     adc1_config_width(width);
     adc1_config_channel_atten(channel, atten);
 
@@ -117,7 +106,7 @@ void measurements_task(void)
 
 
 void create_measurements_task(){
-	xTaskCreate(measurements_task, "measurements_task", 1024*2, NULL, 10, NULL);
-
+	xTaskCreate(measurements_task, "measurements_task", 1024*2, (void*)NULL, 10, NULL);
+	ESP_LOGI(TAG, "Measurements Task created");
 }
 

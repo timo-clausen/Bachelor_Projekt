@@ -28,8 +28,8 @@
 
 static const char *TAG = "touch_input";
 static uint32_t s_pad_init_val[TOUCH_PAD_MAX];
-static bool s_pad_activated[TOUCH_PAD_MAX];
-static bool pad_released = true;
+//static bool s_pad_activated[TOUCH_PAD_MAX];
+//static bool pad_released = true;
 static uint16_t testValue;
 static uint8_t used_touch_pads[] = {TOUCH_PAD_FAN1,
 									TOUCH_PAD_FAN2,
@@ -51,7 +51,7 @@ void set_tresholds(){
 		touch_pad_read_filtered(used_touch_pads[i], &touch_value);
 		 s_pad_init_val[used_touch_pads[i]]=touch_value;
 		 ESP_LOGD(TAG, "pad: [%d]  touch_value: %d",used_touch_pads[i], touch_value);
-		 ESP_ERROR_CHECK(touch_pad_set_thresh(used_touch_pads[i], touch_value * TOUCH_THRESH_FAKTOR)); //(i, touch_value * 2 / 3));
+		 ESP_ERROR_CHECK(touch_pad_set_thresh(used_touch_pads[i], touch_value * TOUCH_THRESH_FAKTOR));
 	}
 }
 
@@ -122,7 +122,6 @@ void set_command_task(void *arg){
 
 	touch_pad_intr_clear();
 	touch_pad_clear_status();
-	//vTaskDelay(50/portTICK_PERIOD_MS);
 	touch_pad_intr_enable();
 	gpio_set_level(26, false);
 	vTaskDelete(xTaskGetCurrentTaskHandle());

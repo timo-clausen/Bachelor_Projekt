@@ -35,6 +35,7 @@ void set_fan_power(uint8_t fan_power);
 
 device_control_t get_device_control_struct();
 device_status_t get_device_status_struct();
+bool is_mqtt_connected();
 
 void create_device_task();
 void set_wifi_state(bool state);

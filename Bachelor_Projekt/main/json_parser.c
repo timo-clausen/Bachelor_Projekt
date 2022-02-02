@@ -78,7 +78,7 @@ void parse_json(char *json_string_t, int string_length){
 		}
 	}
 
-	//printf("JSON String: %s length: %d\n", json_string_t, string_length);
+
 	cJSON_Delete(main_json_object); 			// es muss nur das main Objekt gelöscht werden, sub wird dann mit gelöscht
 	
 }
@@ -140,7 +140,6 @@ void json_main_task(void *arg){
 		if (true == send_status_db_flag){
 			send_status_db();
 		}
-
 	}
 }
 

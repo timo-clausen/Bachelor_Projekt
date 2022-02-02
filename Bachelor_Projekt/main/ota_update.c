@@ -20,11 +20,11 @@
 
 
 #include "ota_update.h"
+#include "device_control.h"
 
 
 static const char *TAG = "ota_update";
 extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
-//extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
 #define OTA_URL_SIZE 256
 
@@ -73,6 +73,7 @@ static esp_err_t _http_client_init_cb(esp_http_client_handle_t http_client)
 
 void ota_update_task(void *pvParameter)
 {
+	uint32_t bytes_read = 0;
     ESP_LOGI(TAG, "Starting OTA Update, connect to %s", CONFIG_FIRMWARE_UPGRADE_URL);
 
     esp_err_t ota_finish_err = ESP_OK;
@@ -120,8 +121,13 @@ void ota_update_task(void *pvParameter)
         // esp_https_ota_perform returns after every read operation which gives user the ability to
         // monitor the status of OTA upgrade by calling esp_https_ota_get_image_len_read, which gives length of image
         // data read so far.
-        ESP_LOGD(TAG, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
+
+        bytes_read = esp_https_ota_get_image_len_read(https_ota_handle);
+        if(bytes_read%100 == 0){
+        	printf("Image bytes read: %d\n",bytes_read);
+        }
     }
+    printf("Image bytes read: %d\n",bytes_read);
 
     if (esp_https_ota_is_complete_data_received(https_ota_handle) != true) {
         // the OTA image was not completely received and user can customise the response to this situation.
@@ -130,7 +136,7 @@ void ota_update_task(void *pvParameter)
         ota_finish_err = esp_https_ota_finish(https_ota_handle);
         if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
             ESP_LOGI(TAG, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            vTaskDelay(10000 / portTICK_PERIOD_MS);
             esp_restart();
         } else {
             if (ota_finish_err == ESP_ERR_OTA_VALIDATE_FAILED) {
@@ -150,13 +156,6 @@ ota_end:
 void start_ota_task(bool start_task)
 {
 
-//#if CONFIG_EXAMPLE_CONNECT_WIFI
-    /* Ensure to disable any WiFi power save mode, this allows best throughput
-     * and hence timings for overall OTA operation.
-     */
-//    esp_wifi_set_ps(WIFI_PS_NONE);
-//#endif // CONFIG_EXAMPLE_CONNECT_WIFI
-
     if(true == start_task){
     	xTaskCreate(&ota_update_task, "ota_update_task", 1024 * 8, NULL, 5, NULL);
     }else{
@@ -164,6 +163,28 @@ void start_ota_task(bool start_task)
     }
 }
 
-void set_new_ota_image_as_valid(void){
-	esp_ota_mark_app_valid_cancel_rollback();
+void verifi_new_ota_firmware(void){
+	esp_ota_img_states_t ota_state;
+	bool verified = false;
+	const esp_partition_t *running_partition = esp_ota_get_running_partition();
+	esp_ota_get_state_partition(running_partition, &ota_state);
+
+	if(ota_state == ESP_OTA_IMG_PENDING_VERIFY){
+		ESP_LOGI(TAG, "verify new Firmware, waiting for MQTT connection");
+		for(int i=0; i<10; i++){
+			vTaskDelay(1000 / portTICK_PERIOD_MS);
+			if(is_mqtt_connected()){
+				esp_ota_mark_app_valid_cancel_rollback();
+				verified = true;
+				ESP_LOGW(TAG, "new Firmware verified");
+				break;
+			}
+		}
+		if(false == verified){
+			ESP_LOGE(TAG, "new Firmware is broken, rollback to old Firmware and reboot ...");
+			vTaskDelay(5000 / portTICK_PERIOD_MS);
+			esp_ota_mark_app_invalid_rollback_and_reboot();
+		}
+
+	}
 }

@@ -65,19 +65,10 @@ void app_main(void)
     mqtt_app_start();
     create_json_task();
 
+    verifi_new_ota_firmware();
 
-
-    set_new_ota_image_as_valid();
-
-    //gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
-    int level = 0;
-    //wifi_country_t power_type;
     while (true) {
-        //gpio_set_level(GPIO_NUM_4, level);
-        level = !level;
 
-        //esp_wifi_get_country(&power_type);
-        //ESP_LOGI(TAG, "power type: %d", power_type.max_tx_power);
         uint32_t free_heap_size=0, min_free_heap_size=0;
         free_heap_size = esp_get_free_heap_size();
         min_free_heap_size = esp_get_minimum_free_heap_size();
