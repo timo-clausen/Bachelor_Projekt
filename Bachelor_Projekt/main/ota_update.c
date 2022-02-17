@@ -163,7 +163,9 @@ void start_ota_task(bool start_task)
     }
 }
 
-void verifi_new_ota_firmware(void){
+
+void ota_verifi_task(){
+
 	esp_ota_img_states_t ota_state;
 	bool verified = false;
 	const esp_partition_t *running_partition = esp_ota_get_running_partition();
@@ -187,4 +189,10 @@ void verifi_new_ota_firmware(void){
 		}
 
 	}
+	vTaskDelete(xTaskGetCurrentTaskHandle());
 }
+
+void verifi_new_ota_firmware(void){
+	xTaskCreate(ota_verifi_task, "OTA_verifi_task", 1024*4, NULL, 10, NULL);
+}
+

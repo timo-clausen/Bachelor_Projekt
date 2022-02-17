@@ -39,6 +39,17 @@ void set_log_levels(){
 
 }
 
+/*
+void ota_visu(){
+
+	while (true){
+		vTaskDelay(500 / portTICK_PERIOD_MS);
+		gpio_set_level(26, true);
+		vTaskDelay(500 / portTICK_PERIOD_MS);
+		gpio_set_level(26, false);
+	}
+}
+*/
 
 void app_main(void)
 {
@@ -59,13 +70,16 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    //xTaskCreate(ota_visu, "OTA_visu_task", 1024*2, NULL, 10, NULL); // für OTA Vorführung
+
     init_touch_interface();
+    verifi_new_ota_firmware();
     create_measurements_task();
 	wifi_init_sta();
     mqtt_app_start();
     create_json_task();
 
-    verifi_new_ota_firmware();
+
 
     while (true) {
 
@@ -74,6 +88,7 @@ void app_main(void)
         min_free_heap_size = esp_get_minimum_free_heap_size();
         printf("aus der main free heap size = %d \t  min_free_heap_size = %d \n",free_heap_size,min_free_heap_size);
         vTaskDelay(300000 / portTICK_PERIOD_MS);
+
     }
 }
 
