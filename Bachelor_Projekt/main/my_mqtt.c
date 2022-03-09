@@ -5,6 +5,8 @@
  *      Author: TiC
  */
 
+// AWS Cloud connect
+
 #include "my_mqtt.h"
 #include <stdio.h>
 
@@ -45,6 +47,7 @@ static char *upload_db_topic;
 //#define CONFIG_BROKER_URI "mqtts://192.168.254.136:8883" SSID
 //#define CONFIG_BROKER_URI "mqtt://192.168.254.254:1883"
 //#define CONFIG_BROKER_URI "mqtt://192.168.0.23:1883"
+
 
 
 
