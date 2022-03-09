@@ -37,13 +37,14 @@
 static const char *TAG = "my_mqtt";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
 
-static char *basic_upload_topic = "device/nr/uplink";
+static char *basic_upload_topic = "device/nr/uplink/";
 static char *upload_topic;
-static char *basic_download_topic = "device/nr/downlink";
+static char *basic_download_topic = "device/nr/downlink/";
 static char *download_topic;
-static char *basic_upload_db_topic = "db/device_nr";
+static char *basic_upload_db_topic = "db/device_nr/";
 static char *upload_db_topic;
-
+static char *basic_device_id = "Client_";
+static char *device_id;
 //#define CONFIG_BROKER_URI "mqtts://192.168.254.136:8883" SSID
 //#define CONFIG_BROKER_URI "mqtt://192.168.254.254:1883"
 //#define CONFIG_BROKER_URI "mqtt://192.168.0.23:1883"
@@ -54,8 +55,10 @@ static char *upload_db_topic;
 #if CONFIG_BROKER_CERTIFICATE_OVERRIDDEN == 1
 static const uint8_t mqtt_eclipseprojects_io_pem_start[]  = "-----BEGIN CERTIFICATE-----\n" CONFIG_BROKER_CERTIFICATE_OVERRIDE "\n-----END CERTIFICATE-----";
 #else
-extern const uint8_t hivemq_server_cert_pem_start[]   asm("_binary_hivemq_server_cert_pem_start");  // Links nur ein Variablen Name Rechts muss zur Datei passen, komischerweise nur in Text. ob Minus oder Unterstrich ist egal. im Asembler jedoch kein Minus erlaubt
+extern const uint8_t aws_root_cert_pem_start[]   asm("_binary_AmazonRootCA1_pem_start");  // Links nur ein Variablen Name Rechts muss zur Datei passen, komischerweise nur in Text. ob Minus oder Unterstrich ist egal. im Asembler jedoch kein Minus erlaubt
 #endif
+extern const uint8_t aws_client_cert_pem[]   asm("_binary_certificate_pem_start");  // Links nur ein Variablen Name Rechts muss zur Datei passen, komischerweise nur in Text. ob Minus oder Unterstrich ist egal. im Asembler jedoch kein Minus erlaubt
+extern const uint8_t aws_client_key_pem[]   asm("_binary_private_pem_start");  // Links nur ein Variablen Name Rechts muss zur Datei passen, komischerweise nur in Text. ob Minus oder Unterstrich ist egal. im Asembler jedoch kein Minus erlaubt
 
 static void send_binary(esp_mqtt_client_handle_t client)
 {
@@ -140,27 +143,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
 void mqtt_app_start(void)
 {
-    const esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = CONFIG_BROKER_URI,
-        .cert_pem = (const char *)hivemq_server_cert_pem_start,
-		//.client_cert_pem = (const char *)hivemq_mqtt_client_cert_2_pem,
-		//.client_key_pem = (const char *)hivemq_mqtt_client_key_2_pem,
-		//.clientkey_password = "testPass",
-		//.clientkey_password_len = 8,
-		.username = "esp32_2",
-		.password = "esp32_2pw",
-		.reconnect_timeout_ms = 2000,
-		.keepalive = 60,
-		.disable_clean_session = true, 			// verpasse Nachrichten werden später zugestellt, aber will man das? Und qos 0 kann nicht veröffentlicht werden
-		//.disable_auto_reconnect = true,
-
-    };
-
-
     static uint8_t chipid[6];
     esp_efuse_mac_get_default(chipid);
     char *string_chipid = (char*) malloc(sizeof(char)*25);
-    sprintf(string_chipid, "/ESP32_%02x%02x%02x", chipid[3], chipid[4], chipid[5]);
+    sprintf(string_chipid, "ESP32_%02x%02x%02x", chipid[3], chipid[4], chipid[5]);
 
     upload_topic = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_upload_topic)+1));
     sprintf(upload_topic, "%s%s", basic_upload_topic, string_chipid);
@@ -168,11 +154,40 @@ void mqtt_app_start(void)
     sprintf(download_topic, "%s%s", basic_download_topic, string_chipid);
     upload_db_topic = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_upload_db_topic)+1));
     sprintf(upload_db_topic, "%s%s", basic_upload_db_topic, string_chipid);
+    device_id = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_device_id)+1));
+    sprintf(device_id, "%s%s", basic_device_id, string_chipid);
+
+    const esp_mqtt_client_config_t mqtt_cfg = {
+        .uri = CONFIG_BROKER_URI,
+        .cert_pem = (const char *)aws_root_cert_pem_start,
+		.client_cert_pem = (const char *)aws_client_cert_pem,
+		.client_key_pem = (const char *)aws_client_key_pem,
+		.client_id = (const char *)device_id,
+		//.clientkey_password = "testPass",
+		//.clientkey_password_len = 8,
+		//.username = "esp32_2",
+		//.password = "esp32_2pw",
+		.reconnect_timeout_ms = 2000,
+		.keepalive = 60,
+		.disable_clean_session = true, 			// verpasse Nachrichten werden später zugestellt, aber will man das? Und qos 0 kann nicht veröffentlicht werden
+		//.disable_auto_reconnect = true,
+
+    };
+    /*printf((const char *)aws_root_cert_pem_start);
+    printf(" das Wurzelzertifikat\n\n");
+
+    printf((const char *)aws_client_cert_pem);
+    printf(" das Client Zertifikat\n\n");
+
+    printf((const char *)aws_client_key_pem);
+      printf(" der Client Key\n\n");
+*/
+
 
     ESP_LOGI(TAG, "Upload Topic: %s", upload_topic);
     ESP_LOGI(TAG, "Download Topic: %s", download_topic);
     ESP_LOGI(TAG, "Upload DB Topic: %s", upload_db_topic);
-
+    ESP_LOGI(TAG, "Client ID: %s", device_id);
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
