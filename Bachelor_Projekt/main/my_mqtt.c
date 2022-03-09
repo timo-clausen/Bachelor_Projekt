@@ -47,6 +47,7 @@ static char *upload_db_topic;
 //#define CONFIG_BROKER_URI "mqtt://192.168.0.23:1883"
 
 
+
 #if CONFIG_BROKER_CERTIFICATE_OVERRIDDEN == 1
 static const uint8_t mqtt_eclipseprojects_io_pem_start[]  = "-----BEGIN CERTIFICATE-----\n" CONFIG_BROKER_CERTIFICATE_OVERRIDE "\n-----END CERTIFICATE-----";
 #else
