@@ -13,6 +13,7 @@
 #include "driver/gpio.h"
 #include "touch_input.h"
 #include "device_control.h"
+#include "wifi_scan.h"
 
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)			// scheint nur für die read anweisung zu gelten, nicht für interrupt
 #define TOUCH_THRESH_NO_USE   (0)
@@ -98,7 +99,8 @@ void set_command_task(void *arg){
 			break;
 		case(TOUCH_PAD_FAN5):
 			ESP_LOGI(TAG, "case 5");
-			set_fan_power(5);
+			//set_fan_power(5);
+			scan_wifi_ap();
 			break;
 		case(TOUCH_PAD_MAIN_POWER):
 			ESP_LOGI(TAG, "case main");
@@ -115,6 +117,7 @@ void set_command_task(void *arg){
 		default:
 			break;
 	}
+
 
 	while(pad_is_aktiv(pushed_pad)){
 		vTaskDelay(20/portTICK_PERIOD_MS);
@@ -139,7 +142,7 @@ void touch_pad_isr(void *arg){
         if ((pad_intr >> i) & 0x01) {
             //s_pad_activated[i] = true;
 
-        	xTaskCreate(set_command_task, "touch_set_command_task", 1024*2, (void*)i, 10, NULL);
+        	xTaskCreate(set_command_task, "touch_set_command_task", 1024*4, (void*)i, 10, NULL);
         }
     }
 }
