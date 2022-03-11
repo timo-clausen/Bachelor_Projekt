@@ -106,7 +106,7 @@ void measurements_task(void)
 
 
 void create_measurements_task(){
-	xTaskCreate(measurements_task, "measurements_task", 1024*2, (void*)NULL, 10, NULL);
+	xTaskCreate((void*)measurements_task, "measurements_task", 1024*2, (void*)NULL, 10, NULL);
 	ESP_LOGI(TAG, "Measurements Task created");
 }
 

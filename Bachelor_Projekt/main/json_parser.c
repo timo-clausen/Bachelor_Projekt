@@ -20,6 +20,7 @@
 
 
 static const char *TAG = "json_parser";
+static char *device_id;
 static bool send_status_feedback_flag = false;
 static bool send_status_db_flag = false;
 
@@ -29,6 +30,11 @@ void set_send_status_feedback_flag(){
 
 void set_send_status_db_flag(){
 	send_status_db_flag = true;
+}
+
+
+void set_device_id(char *dev_id){
+	device_id = dev_id;
 }
 
 void parse_status_command(cJSON *sub_json_object) {
@@ -114,6 +120,7 @@ void send_status_db(){
 	char *json_string;
 	cJSON *main_json_object = cJSON_CreateObject();
 	cJSON *sub_json_object = cJSON_CreateObject();
+	cJSON_AddItemToObject(main_json_object, "Device_ID", cJSON_CreateString(device_id));
 	cJSON_AddItemToObject(main_json_object, "uplink_db", sub_json_object);
 	cJSON_AddItemToObject(sub_json_object, "air_temperature", cJSON_CreateNumber(device_status.air_temperature));
 	cJSON_AddItemToObject(sub_json_object, "filter_hours", cJSON_CreateNumber(device_status.filter_hours));

@@ -157,6 +157,13 @@ void mqtt_app_start(void)
     device_id = (char*) malloc(sizeof(char)*(strlen(string_chipid)+strlen(basic_device_id)+1));
     sprintf(device_id, "%s%s", basic_device_id, string_chipid);
 
+    set_device_id(string_chipid);
+
+    ESP_LOGI(TAG, "Upload Topic: %s", upload_topic);
+    ESP_LOGI(TAG, "Download Topic: %s", download_topic);
+    ESP_LOGI(TAG, "Upload DB Topic: %s", upload_db_topic);
+    ESP_LOGI(TAG, "Client ID: %s", device_id);
+
     const esp_mqtt_client_config_t mqtt_cfg = {
         .uri = CONFIG_BROKER_URI,
         .cert_pem = (const char *)aws_root_cert_pem_start,
@@ -184,10 +191,7 @@ void mqtt_app_start(void)
 */
 
 
-    ESP_LOGI(TAG, "Upload Topic: %s", upload_topic);
-    ESP_LOGI(TAG, "Download Topic: %s", download_topic);
-    ESP_LOGI(TAG, "Upload DB Topic: %s", upload_db_topic);
-    ESP_LOGI(TAG, "Client ID: %s", device_id);
+
 
     ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
