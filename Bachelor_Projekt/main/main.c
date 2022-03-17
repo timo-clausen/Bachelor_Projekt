@@ -76,6 +76,7 @@ void app_main(void)
     verifi_new_ota_firmware();
     create_measurements_task();
 	wifi_init_sta();
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
     mqtt_app_start();
     create_json_task();
 

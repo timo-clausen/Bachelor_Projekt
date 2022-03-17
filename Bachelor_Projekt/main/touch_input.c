@@ -13,6 +13,7 @@
 #include "driver/gpio.h"
 #include "touch_input.h"
 #include "device_control.h"
+#include "json_parser.h" // nur für manuelles senden
 
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)			// scheint nur für die read anweisung zu gelten, nicht für interrupt
 #define TOUCH_THRESH_NO_USE   (0)
@@ -50,7 +51,7 @@ void set_tresholds(){
 	for(int i = 0; i < sizeof(used_touch_pads); i++){
 		touch_pad_read_filtered(used_touch_pads[i], &touch_value);
 		 s_pad_init_val[used_touch_pads[i]]=touch_value;
-		 ESP_LOGD(TAG, "pad: [%d]  touch_value: %d",used_touch_pads[i], touch_value);
+		 ESP_LOGI(TAG, "pad: [%d]  touch_value: %d",used_touch_pads[i], touch_value);
 		 ESP_ERROR_CHECK(touch_pad_set_thresh(used_touch_pads[i], touch_value * TOUCH_THRESH_FAKTOR));
 	}
 }
@@ -111,6 +112,7 @@ void set_command_task(void *arg){
 		case(TOUCH_PAD_ION_POWER):
 			ESP_LOGI(TAG, "case ion");
 			set_ion_power(!current_state.ion_power);
+			set_send_status_db_flag();
 			break;
 		default:
 			break;
