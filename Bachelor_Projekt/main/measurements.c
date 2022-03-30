@@ -69,7 +69,7 @@ double measure_air_temperature(){
 		adc_reading += adc1_get_raw((adc1_channel_t)channel);
 	}
 	adc_reading /= NO_OF_SAMPLES;
-	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars) -60;			// -60 draußen ohne
+	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars)-60;			// -60 draußen ohne
 	double temperature = (voltage*28.9)/1000-22.5;
 	printf("Raw: %d\tVoltage: %dmV\t T: %.2f C\n", adc_reading, voltage, temperature);
 	return temperature;

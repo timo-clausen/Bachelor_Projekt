@@ -54,7 +54,7 @@ void ota_visu(){
 void app_main(void)
 {
 
-	create_device_task();
+	//create_device_task();
 	set_log_levels();
 	//Initialize NVS aus wifi_connect netconn
 	esp_err_t ret = nvs_flash_init();

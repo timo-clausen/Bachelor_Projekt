@@ -112,7 +112,7 @@ void set_command_task(void *arg){
 		case(TOUCH_PAD_ION_POWER):
 			ESP_LOGI(TAG, "case ion");
 			set_ion_power(!current_state.ion_power);
-			set_send_status_db_flag();
+			//set_send_status_db_flag();
 			break;
 		default:
 			break;
