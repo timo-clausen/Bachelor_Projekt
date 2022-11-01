@@ -16,6 +16,7 @@
 #include "measurements.h"
 #include "ota_update.h"
 #include "touch_input.h"
+#include "enviromental_sensor.h"
 
 
 #include "driver/touch_pad.h"
@@ -54,7 +55,7 @@ void ota_visu(){
 void app_main(void)
 {
 
-	//create_device_task();
+	create_device_task();
 	set_log_levels();
 	//Initialize NVS aus wifi_connect netconn
 	esp_err_t ret = nvs_flash_init();
@@ -71,6 +72,8 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     //xTaskCreate(ota_visu, "OTA_visu_task", 1024*2, NULL, 10, NULL); // für OTA Vorführung
+
+    //sensor_init();
 
     init_touch_interface();
     verifi_new_ota_firmware();

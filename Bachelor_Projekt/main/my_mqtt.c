@@ -30,6 +30,8 @@
 #include "json_parser.h"
 #include "device_control.h"
 
+#define AWS_BASIC_INGEST_AIR "$aws/rules/AirData"
+
 #define UPLOAD_TOPIC	upload_topic //"test/topic/uplink"
 #define DOWNLOAD_TOPIC download_topic //"test/topic/downlink"
 #define UPLOAD_DB	upload_db_topic //"db/device_nr"
@@ -216,6 +218,17 @@ void mqtt_publish_db(const char *data){
 	int msg_id;
 	if(NULL != mqtt_client){
 		msg_id = esp_mqtt_client_publish(mqtt_client, UPLOAD_DB, data, 0, qos, 0);
+
+	}else{
+		ESP_LOGE(TAG, "MQTT Client not initialized");
+	}
+}
+
+void mqtt_publish_enviromental_sensor_data(const char *data){
+	static uint8_t qos = 0;
+	int msg_id;
+	if(NULL != mqtt_client){
+		msg_id = esp_mqtt_client_publish(mqtt_client, AWS_BASIC_INGEST_AIR, data, 0, qos, 0);
 
 	}else{
 		ESP_LOGE(TAG, "MQTT Client not initialized");
