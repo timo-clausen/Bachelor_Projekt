@@ -27,8 +27,8 @@
 
 
 
-#define ESP_WIFI_SSID "Kristronics DSL" //CONFIG_ESP_WIFI_SSID
-#define ESP_WIFI_PASSWORD "c0mpan#freeDSL" //CONFIG_ESP_WIFI_PASSWORD
+#define ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID // "Kristronics DSL"
+#define ESP_WIFI_PASSWORD CONFIG_ESP_WIFI_PASSWORD //"c0mpan#freeDSL" //
 #define EXAMPLE_ESP_MAXIMUM_RETRY  500
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -114,8 +114,8 @@ void wifi_init_sta(void)
         },
     };
 
-    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
-    ESP_ERROR_CHECK(esp_wifi_set_protocol(ESP_IF_WIFI_STA, 7)); // wifi mode bgn  wenn ESSP abstürzt mal auskommentieren -> test
+    //ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+    //ESP_ERROR_CHECK(esp_wifi_set_protocol(ESP_IF_WIFI_STA, 7)); // wifi mode bgn  wenn ESSP abstürzt mal auskommentieren -> test
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );

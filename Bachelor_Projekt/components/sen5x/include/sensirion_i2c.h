@@ -54,7 +54,7 @@ extern "C" {
 
 uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count);
 
-int8_t sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
+int8_t sensirion_i2c_check_crc(uint8_t* data, uint16_t count,
                                uint8_t checksum);
 
 /**

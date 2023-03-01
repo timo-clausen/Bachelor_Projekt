@@ -37,6 +37,8 @@
 #include "freertos/task.h"
 #include "hal/i2c_hal.h"
 
+#include "esp_log.h"
+
 
 
 #define I2C_MASTER_TX_BUF_DISABLE 	0 					/*!< I2C master doesn't need buffer */
@@ -50,8 +52,8 @@
 #define NACK_VAL 					0x1                	/*!< I2C nack value */
 #define LAST_NACK_VAL				0x2					/*!< I2C last nack value*/
 
-static gpio_num_t i2c_gpio_sda = 33;
-static gpio_num_t i2c_gpio_scl = 22;
+static gpio_num_t i2c_gpio_sda = 38; //33;
+static gpio_num_t i2c_gpio_scl = 37;  //22;
 //static uint32_t i2c_frequency = 100000;
 static i2c_port_t i2c_port = I2C_NUM_0;
 
@@ -128,7 +130,7 @@ void sensirion_i2c_hal_init(void) {
 			.sda_pullup_en = GPIO_PULLUP_ENABLE, 	//
 			.scl_pullup_en = GPIO_PULLUP_ENABLE,
 			.master.clk_speed = I2C_MASTER_FREQ_HZ,
-			.clk_flags = 0,
+			.clk_flags = I2C_SCLK_APB,
     };
 
 	i2c_param_config(i2c_port, & config);
@@ -180,7 +182,7 @@ int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
 
 //	for(uint8_t i = 0; i<(count-1); i++)
 //	{
-//		i2c_master_read_byte(cmd, data, ACK_VAL);
+//		i2c_master_read_byte(cmd, data++, ACK_VAL);
 //	}
 //
 //	i2c_master_read_byte(cmd, data, NACK_VAL);
@@ -189,6 +191,8 @@ int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
 	i2c_master_stop(cmd);
 	err_code = i2c_master_cmd_begin(i2c_port, cmd, 100 / portTICK_RATE_MS);
 	i2c_cmd_link_delete(cmd);
+
+	ESP_LOGI("I2C", "err_code: %d", err_code);
 
 	switch(err_code)
 	{

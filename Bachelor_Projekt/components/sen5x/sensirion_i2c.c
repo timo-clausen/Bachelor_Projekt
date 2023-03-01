@@ -35,6 +35,8 @@
 #include "include/sensirion_config.h"
 #include "include/sensirion_i2c_hal.h"
 
+#include "esp_log.h"
+
 uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
     uint16_t current_byte;
     uint8_t crc = CRC8_INIT;
@@ -53,8 +55,12 @@ uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
     return crc;
 }
 
-int8_t sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
+int8_t sensirion_i2c_check_crc( uint8_t* data, uint16_t count,
                                uint8_t checksum) {
+	ESP_LOGI("SEN54", "data: 0x%x 0x%x, checksum: 0x%x  ", data[0], data[1], checksum);
+//	data[0] = 0x00;
+//	data[1] = 0x35;
+	ESP_LOGI("SEN54", "checksum: 0x%x  ", sensirion_i2c_generate_crc(data, count));
     if (sensirion_i2c_generate_crc(data, count) != checksum)
         return CRC_ERROR;
     return NO_ERROR;
@@ -276,7 +282,12 @@ int16_t sensirion_i2c_read_data_inplace(uint8_t address, uint8_t* buffer,
     }
 
     error = sensirion_i2c_hal_read(address, buffer, size);
+//    for(int i=0; i<size; i++){
+//    	printf("Buffer[%d]: 0x%x \n", i, buffer[i]);
+//    }
+
     if (error) {
+    	ESP_LOGI("SEN54", "error hal read");
         return error;
     }
 
@@ -285,6 +296,7 @@ int16_t sensirion_i2c_read_data_inplace(uint8_t address, uint8_t* buffer,
         error = sensirion_i2c_check_crc(&buffer[i], SENSIRION_WORD_SIZE,
                                         buffer[i + SENSIRION_WORD_SIZE]);
         if (error) {
+        	ESP_LOGI("SEN54", "error in check crc");
             return error;
         }
         buffer[j++] = buffer[i];

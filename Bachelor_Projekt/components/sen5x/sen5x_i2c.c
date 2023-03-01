@@ -43,7 +43,9 @@
 #include "include/sensirion_i2c.h"
 #include "include/sensirion_i2c_hal.h"
 
-#define SEN5X_I2C_ADDRESS 0x69			//default given by sensirion, DON'T CHANGE IT
+#include "esp_log.h"
+
+#define SEN5X_I2C_ADDRESS 0x69 //0x69			//default given by sensirion, DON'T CHANGE IT
 
 int16_t sen5x_start_measurement(void) {
     int16_t error;
@@ -116,7 +118,7 @@ int16_t sen5x_read_measured_values(uint16_t* mass_concentration_pm1p0,
                                    int16_t* ambient_temperature,
                                    int16_t* voc_index, int16_t* nox_index) {
     int16_t error;
-    uint8_t buffer[24];
+    uint8_t buffer[24] = {0};
     uint16_t offset = 0;
     offset = sensirion_i2c_add_command_to_buffer(&buffer[0], offset, 0x3C4);
 
@@ -131,6 +133,7 @@ int16_t sen5x_read_measured_values(uint16_t* mass_concentration_pm1p0,
     if (error) {
         return error;
     }
+
     *mass_concentration_pm1p0 = sensirion_common_bytes_to_uint16_t(&buffer[0]);
     *mass_concentration_pm2p5 = sensirion_common_bytes_to_uint16_t(&buffer[2]);
     *mass_concentration_pm4p0 = sensirion_common_bytes_to_uint16_t(&buffer[4]);

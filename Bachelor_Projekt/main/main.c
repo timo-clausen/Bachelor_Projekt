@@ -13,9 +13,9 @@
 #include "my_mqtt.h"
 #include "device_control.h"
 #include "json_parser.h"
-#include "measurements.h"
+//#include "measurements.h"
 #include "ota_update.h"
-#include "touch_input.h"
+//#include "touch_input.h"
 #include "enviromental_sensor.h"
 
 
@@ -55,7 +55,7 @@ void ota_visu(){
 void app_main(void)
 {
 
-	create_device_task();
+	//create_device_task();
 	set_log_levels();
 	//Initialize NVS aus wifi_connect netconn
 	esp_err_t ret = nvs_flash_init();
@@ -75,11 +75,14 @@ void app_main(void)
 
     //sensor_init();
 
-    init_touch_interface();
-    verifi_new_ota_firmware();
-    create_measurements_task();
+    //init_touch_interface();
+    //verifi_new_ota_firmware();
+    //create_measurements_task();
+	gpio_set_direction(20, GPIO_MODE_OUTPUT);
+	gpio_set_level(20, 1);
 	wifi_init_sta();
 	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	sensor_init();
     mqtt_app_start();
     create_json_task();
 
